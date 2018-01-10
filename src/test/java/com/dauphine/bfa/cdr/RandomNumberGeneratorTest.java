@@ -38,6 +38,26 @@ public class RandomNumberGeneratorTest {
         }
     }
 
+    @Test
+    public void should_generate_a_correlated_random_number_array() {
+        final double[][] correlationMatrixInput = new double[][] {
+                {1, 0.25, 0.25, 0.25, 0.25},
+                {0.25, 1, 0.25, 0.25, 0.25},
+                {0.25, 0.25, 1, 0.25, 0.25},
+                {0.25, 0.25, 0.25, 1, 0.25},
+                {0.25, 0.25, 0.25, 0.25, 1}
+        };
+        final int size = 5;
+
+        double[] randomNumbers = RandomNumberGenerator.generateCorrelatedRandomNumberArray(
+                correlationMatrixInput, size);
+        assertTrue(randomNumbers.length == 5);
+        for (double randomNumber : randomNumbers) {
+            assertRandomNumberIsNotZero(randomNumber);
+            System.out.println(randomNumber);
+        }
+    }
+
 
     private void assertRandomNumberIsNotZero(final double number) {
         assertTrue(number != 0d);

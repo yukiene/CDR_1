@@ -1,6 +1,12 @@
 package com.dauphine.bfa.cdr;
 
 import java.util.Random;
+import org.apache.commons.math3.linear.CholeskyDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.NonPositiveDefiniteMatrixException;
+import org.apache.commons.math3.linear.NonSquareMatrixException;
+import org.apache.commons.math3.linear.NonSymmetricMatrixException;
+import org.apache.commons.math3.linear.RealMatrix;
 
 /**
  * Box-Muller algo : https://fr.wikipedia.org/wiki/M%C3%A9thode_de_Box-Muller
@@ -50,6 +56,35 @@ public class RandomNumberGenerator {
         }
 
         return numbers;
+    }
+
+    /**
+     * generate an array of correlated random numbers
+     * @param correlatedMatrixInput input correlated matrix
+     * @param numberSize nb number
+     * @return an array of random number
+     */
+    public static double[] generateCorrelatedRandomNumberArray(final double[][] correlatedMatrixInput, final int numberSize) {
+        final RealMatrix realMatrix = MatrixUtils.createRealMatrix(correlatedMatrixInput);
+
+        try {
+            final CholeskyDecomposition choleskyDecomposition = new CholeskyDecomposition(realMatrix);
+            final RealMatrix lMatrix = choleskyDecomposition.getL();
+
+            double[] randomNumbers = generateRandomNumberArray(numberSize);
+
+            RealMatrix rowRealMatrix = MatrixUtils.createRowRealMatrix(randomNumbers);
+            RealMatrix resultMatrix = rowRealMatrix.multiply(lMatrix);
+
+            return resultMatrix.getRow(0);
+        } catch (NonSquareMatrixException exception) {
+            System.err.println("the matrix is not squared");
+        } catch (NonSymmetricMatrixException exception) {
+            System.err.println("the matrix is not Symmetric");
+        } catch (NonPositiveDefiniteMatrixException exception) {
+            System.err.println("the matrix is not positive definite");
+        }
+        return null;
     }
 
     private RandomNumberGenerator() {}
